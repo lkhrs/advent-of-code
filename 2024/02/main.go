@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strconv"
 )
 
@@ -48,11 +49,9 @@ func sliceStrToInt(str []string) []int {
 	return intSlice
 }
 
-// Check if a report is within acceptable range.
-func acceptableRange(report []int) bool {
-	if len(report) < 2 {
-		return false
-	}
+// Check if the values in a report are within acceptable range.
+func acceptableRange(reportString []string) (acceptableRange bool) {
+	report := sliceStrToInt(reportString)
 	increasing := report[1] > report[0]
 	for i, _ := range report {
 		if i > 0 {
@@ -71,16 +70,27 @@ func acceptableRange(report []int) bool {
 }
 
 // Iterate through the reports and count the safe ones.
-func safeReports(reports [][]string) int {
-	safe := 0
+func safeReports(reports [][]string, dampener bool) (safe int) {
 	for _, report := range reports {
-		if acceptableRange(sliceStrToInt(report)) {
+		if acceptableRange(report) {
 			safe++
 		}
+		// if the dampener is enabled, iterate through the report and see if removing a level would make the report safe.
+		if !acceptableRange(report) && dampener {
+			for i := range report {
+				modifiedReport := slices.Concat(report[:i], report[i+1:])
+				if acceptableRange(modifiedReport) {
+					safe++
+					break
+				}
+			}
+		}
 	}
-	return safe
+	return
 }
 
 func main() {
-	fmt.Println("Safe reports:", safeReports(parseFile()))
+	fmt.Println("Safe reports:", safeReports(parseFile(), false))
+	fmt.Println("--Problem Dampener enabled--")
+	fmt.Println("Safe reports:", safeReports(parseFile(), true))
 }

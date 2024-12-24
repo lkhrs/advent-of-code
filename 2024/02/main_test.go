@@ -41,16 +41,17 @@ func TestStrToIntSlice(t *testing.T) {
 
 func TestAcceptableRange(t *testing.T) {
 	tests := []struct {
-		input    []int
+		input    []string
 		expected bool
 	}{
-		{input: []int{7, 6, 4, 2, 1}, expected: true},
-		{input: []int{1, 2, 7, 8, 9}, expected: false},
-		{input: []int{9, 7, 6, 2, 1}, expected: false},
-		{input: []int{1, 3, 2, 4, 5}, expected: false},
-		{input: []int{8, 6, 4, 4, 1}, expected: false},
-		{input: []int{1, 3, 6, 7, 9}, expected: true},
-		{input: []int{15, 16, 18, 20, 23}, expected: true},
+		{[]string{"4", "5", "6"}, true},
+		{[]string{"4", "8", "15", "16", "23", "42"}, false},
+		{[]string{"1", "2", "3", "4", "5"}, true},
+		{[]string{"1", "4", "7", "10"}, true},
+		{[]string{"10", "9", "8", "7"}, true},
+		{[]string{"10", "7", "4", "1"}, true},
+		{[]string{"1", "2", "2", "3"}, false},
+		{[]string{"1", "2", "5"}, true},
 	}
 
 	for _, test := range tests {
@@ -65,45 +66,76 @@ func TestSafeReports(t *testing.T) {
 	tests := []struct {
 		name     string
 		reports  [][]string
+		dampener bool
 		expected int
 	}{
 		{
-			name:     "All safe reports",
-			reports:  [][]string{{"2", "3", "4"}, {"5", "6", "7"}, {"15", "16", "17"}},
+			name: "All safe reports without dampener",
+			reports: [][]string{
+				{"1", "2", "3"},
+				{"4", "5", "6"},
+				{"7", "8", "9"},
+			},
+			dampener: false,
 			expected: 3,
 		},
 		{
-			name:     "No safe reports",
-			reports:  [][]string{{"481"}, {"1623"}, {"2345"}, {"4231"}},
-			expected: 0,
-		},
-		{
-			name:     "Mixed safe and unsafe reports",
-			reports:  [][]string{{"4", "5"}, {"8", "14"}, {"15", "16"}, {"1623"}, {"2345"}},
+			name: "Some unsafe reports without dampener",
+			reports: [][]string{
+				{"1", "2", "3"},
+				{"4", "8", "6"},
+				{"7", "8", "9"},
+			},
+			dampener: false,
 			expected: 2,
 		},
 		{
-			name:     "Empty reports",
-			reports:  [][]string{},
-			expected: 0,
+			name: "All safe reports with dampener",
+			reports: [][]string{
+				{"1", "2", "3"},
+				{"4", "5", "6"},
+				{"7", "8", "9"},
+			},
+			dampener: true,
+			expected: 3,
 		},
 		{
-			name:     "Single safe report",
-			reports:  [][]string{{"4", "5"}},
-			expected: 1,
+			name: "Some unsafe reports with dampener",
+			reports: [][]string{
+				{"1", "2", "3"},
+				{"4", "8", "6"},
+				{"7", "8", "9"},
+			},
+			dampener: true,
+			expected: 3,
 		},
 		{
-			name:     "Single unsafe report",
-			reports:  [][]string{{"4", "3", "2", "2"}},
-			expected: 0,
+			name: "Reports with large differences",
+			reports: [][]string{
+				{"1", "2", "10"},
+				{"4", "5", "6"},
+				{"7", "8", "9"},
+			},
+			dampener: true,
+			expected: 3,
+		},
+		{
+			name: "Reports with equal values",
+			reports: [][]string{
+				{"1", "1", "1"},
+				{"4", "5", "6"},
+				{"7", "8", "9"},
+			},
+			dampener: true,
+			expected: 2,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := safeReports(tt.reports)
-			if result != tt.expected {
-				t.Errorf("safeReports(%v) = %d; expected %d", tt.reports, result, tt.expected)
+			got := safeReports(tt.reports, tt.dampener)
+			if got != tt.expected {
+				t.Errorf("safeReports() = %v, want %v", got, tt.expected)
 			}
 		})
 	}
