@@ -13,6 +13,22 @@ func stringToI(s string) int {
 	return i
 }
 
+func compute(operations [][]string) (total int) {
+	execute := true
+	for _, num := range operations {
+		if num[0] == "do()" {
+			execute = true
+		}
+		if num[0] == "don't()" {
+			execute = false
+		}
+		if execute {
+			total += stringToI(num[1]) * stringToI(num[2])
+		}
+	}
+	return
+}
+
 func main() {
 	file, err := os.Open("input")
 	if err != nil {
@@ -24,15 +40,14 @@ func main() {
 	for scanner.Scan() {
 		data += scanner.Text()
 	}
-	
+
 	// Match valid operations
-	regex := regexp.MustCompile(`mul\((\d+),(\d+)\)`)
-	operations := regex.FindAllStringSubmatch(data, -1)
-	
+	regexpMul := regexp.MustCompile(`mul\((\d+),(\d+)\)`)
+	regexpMulDoDont := regexp.MustCompile(`mul\((\d+),(\d+)\)|do\(\)|don't\(\)`)
+	mul := regexpMul.FindAllStringSubmatch(data, -1)
+	mulDoDont := regexpMulDoDont.FindAllStringSubmatch(data, -1)
+
 	// Compute the instructions
-	total := 0
-	for _, num := range operations {
-		total += stringToI(num[1]) * stringToI(num[2])
-	}
-	fmt.Println("Total: ", total)
+	fmt.Println("Total part 1: ", compute(mul))
+	fmt.Println("Total part 2: ", compute(mulDoDont))
 }
