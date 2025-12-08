@@ -34,16 +34,7 @@ func normalizeDial(dial int, dialSize int) int {
 	return (dial%modulus + modulus) % modulus
 }
 
-func main() {
-	dial := 50
-	dialSize := 99
-
-	file, err := os.Open("input")
-	if err != nil {
-		fmt.Println("error opening file:", err)
-	}
-
-	zeroCount := 0
+func zeroCount(file *os.File, dial, dialSize int) (zeroCount int) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -60,5 +51,17 @@ func main() {
 
 		zeroCount++
 	}
-	fmt.Println("password:", zeroCount)
+	return
+}
+
+func main() {
+	dial := 50
+	dialSize := 99
+
+	file, err := os.Open("input")
+	if err != nil {
+		fmt.Println("error opening file:", err)
+	}
+
+	fmt.Println("part 1 password:", zeroCount(file, dial, dialSize))
 }
