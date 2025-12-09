@@ -29,25 +29,25 @@ func TestGetRotation(t *testing.T) {
 }
 
 func TestNormalizeDial(t *testing.T) {
+	dialSize := 99
 	tests := []struct {
 		dial     int
-		dialSize int
 		expected int
 	}{
-		{dial: 0, dialSize: 99, expected: 0},
-		{dial: -1, dialSize: 99, expected: 99},
-		{dial: 50, dialSize: 99, expected: 50},
-		{dial: 100, dialSize: 99, expected: 0},
-		{dial: -100, dialSize: 99, expected: 0},
-		{dial: 198, dialSize: 99, expected: 98},
-		{dial: -198, dialSize: 99, expected: 2},
-		{dial: 700, dialSize: 99, expected: 0},
+		{dial: 0, expected: 0},
+		{dial: -1, expected: dialSize},
+		{dial: 50, expected: 50},
+		{dial: 100, expected: 0},
+		{dial: -100, expected: 0},
+		{dial: 198, expected: 98},
+		{dial: -198, expected: 2},
+		{dial: 700, expected: 0},
 	}
 
 	for _, test := range tests {
-		result := normalizeDial(test.dial, test.dialSize)
+		result := normalizeDial(test.dial, dialSize)
 		if result != test.expected {
-			t.Errorf("normalizeDial(%d, %d) = %d; expected %d", test.dial, test.dialSize, result, test.expected)
+			t.Errorf("normalizeDial(%d, %d) = %d; expected %d", test.dial, dialSize, result, test.expected)
 		}
 	}
 }
