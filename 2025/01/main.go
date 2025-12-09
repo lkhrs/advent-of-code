@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 )
@@ -34,34 +35,37 @@ func normalizeDial(dial int, dialSize int) int {
 	return (dial%modulus + modulus) % modulus
 }
 
-func zeroCount(file *os.File, dial, dialSize int) (zeroCount int) {
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		line := scanner.Text()
-		rotation, err := getRotation(line)
-		if err != nil {
-			fmt.Println(err)
-			break
-		}
-
-		dial = normalizeDial((dial + rotation), dialSize)
-		if dial != 0 {
-			continue
-		}
-
-		zeroCount++
-	}
+func zeroCount(line string, dial, dialSize int) (landedOnZero bool, passedZeroCount, newDial int) {
+	rotation, _ := getRotation(line)
+	rawDial := dial + rotation
+	newDial = normalizeDial(rawDial, dialSize)
+	landedOnZero = newDial == 0
+	passedZeroCount = int(math.Round(float64(rawDial) / float64(dialSize+1)))
 	return
 }
 
 func main() {
 	dial := 50
 	dialSize := 99
+	landedZeroes := 0
+	passedZeroes := 0
 
 	file, err := os.Open("input")
 	if err != nil {
 		fmt.Println("error opening file:", err)
 	}
 
-	fmt.Println("part 1 password:", zeroCount(file, dial, dialSize))
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		landedOnZero, passedZeroCount, newDial := zeroCount(line, dial, dialSize)
+		if landedOnZero {
+			landedZeroes++
+		}
+		passedZeroes += passedZeroCount
+		dial = newDial
+	}
+
+	fmt.Println("part 1 password:", landedZeroes)
+	fmt.Println("part 2 password:", landedZeroes+passedZeroes)
 }

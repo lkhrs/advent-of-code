@@ -51,3 +51,43 @@ func TestNormalizeDial(t *testing.T) {
 		}
 	}
 }
+
+func TestZeroCount(t *testing.T) {
+	dial := 50
+	dialSize := 99
+
+	steps := []struct {
+		rotation     string
+		expectedDial int
+		expectedLand bool
+		expectedPass int
+	}{
+		{rotation: "L68", expectedDial: 82, expectedLand: false, expectedPass: 1},
+		{rotation: "L30", expectedDial: 52, expectedLand: false, expectedPass: 0},
+		{rotation: "R48", expectedDial: 0, expectedLand: true, expectedPass: 0},
+		{rotation: "L5", expectedDial: 95, expectedLand: false, expectedPass: 0},
+		{rotation: "R60", expectedDial: 55, expectedLand: false, expectedPass: 1},
+		{rotation: "L55", expectedDial: 0, expectedLand: true, expectedPass: 0},
+		{rotation: "L1", expectedDial: 99, expectedLand: false, expectedPass: 0},
+		{rotation: "L99", expectedDial: 0, expectedLand: true, expectedPass: 0},
+		{rotation: "R14", expectedDial: 14, expectedLand: false, expectedPass: 0},
+		{rotation: "L82", expectedDial: 32, expectedLand: false, expectedPass: 1},
+		{rotation: "R1000", expectedDial: 32, expectedLand: false, expectedPass: 0},
+	}
+
+	for idx, step := range steps {
+		landedOnZero, passedZeroCount, newDial := zeroCount(step.rotation, dial, dialSize)
+
+		if landedOnZero != step.expectedLand {
+			t.Errorf("step %d (%s): landedOnZero = %t; want %t", idx+1, step.rotation, landedOnZero, step.expectedLand)
+		}
+		if passedZeroCount != step.expectedPass {
+			t.Errorf("step %d (%s): passedZeroCount = %d; want %d", idx+1, step.rotation, passedZeroCount, step.expectedPass)
+		}
+		if newDial != step.expectedDial {
+			t.Errorf("step %d (%s): new dial = %d; want %d", idx+1, step.rotation, newDial, step.expectedDial)
+		}
+
+		dial = newDial
+	}
+}
