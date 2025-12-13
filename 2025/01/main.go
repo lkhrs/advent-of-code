@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 )
@@ -35,12 +34,22 @@ func normalizeDial(dial int, dialSize int) int {
 	return (dial%modulus + modulus) % modulus
 }
 
+// returns whether the dial landed on zero, how many times it passed zero, and the new dial position.
 func zeroCount(line string, dial, dialSize int) (landedOnZero bool, passedZeroCount, newDial int) {
 	rotation, _ := getRotation(line)
-	rawDial := dial + rotation
+	modulus := dialSize + 1
+	effectiveRotation := rotation % modulus
+	rawDial := dial + effectiveRotation
 	newDial = normalizeDial(rawDial, dialSize)
 	landedOnZero = newDial == 0
-	passedZeroCount = int(math.Round(float64(rawDial) / float64(dialSize+1)))
+
+	switch {
+	case effectiveRotation > 0 && rawDial >= modulus && newDial != 0:
+		passedZeroCount = 1
+	case effectiveRotation < 0 && rawDial < 0 && dial != 0:
+		passedZeroCount = 1
+	}
+
 	return
 }
 
