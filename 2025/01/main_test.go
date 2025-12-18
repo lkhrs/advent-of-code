@@ -74,8 +74,8 @@ func TestZeroCount(t *testing.T) {
 		{rotation: "L82", expectedDial: 32, expectedLand: false, expectedPass: 1},
 		{rotation: "R1000", expectedDial: 32, expectedLand: false, expectedPass: 10},
 		{rotation: "L32", expectedDial: 0, expectedLand: true, expectedPass: 0},
-		{rotation: "L50", expectedDial: 50, expectedLand: true, expectedPass: 0},
-		{rotation: "R101", expectedDial: 1, expectedLand: false, expectedPass: 1},
+		{rotation: "L50", expectedDial: 50, expectedLand: false, expectedPass: 0},
+		{rotation: "R101", expectedDial: 51, expectedLand: false, expectedPass: 1},
 	}
 
 	for idx, step := range steps {
